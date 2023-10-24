@@ -25,11 +25,15 @@ public class AuthController {
 //    code = 200, message = "Token generated"
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO) {
-        // Validate the username and password here
-        if (authService.getUsername().equals(loginDTO.getUsername()) && authService.getPassword().equals(loginDTO.getPassword())) {
-            // Generate a token
-            return ResponseEntity.ok(token);
-        } else {
+        try {
+            // Validate the username and password here
+            if (authService.getUsername().equals(loginDTO.getUsername()) && authService.getPassword().equals(loginDTO.getPassword())) {
+                // Generate a token
+                return ResponseEntity.ok(token);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            }
+        }catch (Exception e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }

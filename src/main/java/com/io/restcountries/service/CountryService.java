@@ -25,15 +25,18 @@ public class CountryService {
 
     public Object getCountryDetails(String countryName) {
         // Make a REST API request to fetch detailed country information
+        try {
+            String url = restCountriesApiUrl + "/name/" + countryName;
 
-        String url = restCountriesApiUrl + "/name/" + countryName;
+            // Make an HTTP GET request to the REST Countries API
+            Object[] response = restTemplate.getForObject(url, Object[].class);
 
-        // Make an HTTP GET request to the REST Countries API
-        Object[] response = restTemplate.getForObject(url, Object[].class);
-
-        if (response != null && response.length > 0) {
-            return response[0];
-        } else {
+            if (response != null && response.length > 0) {
+                return response[0];
+            } else {
+                throw new CountryNotFoundException(countryName);
+            }
+        }catch (Exception e){
             throw new CountryNotFoundException(countryName);
         }
 
@@ -42,28 +45,32 @@ public class CountryService {
 
 
     public List<Map<String, Object>> getCountries(String filterBy, String sortBy, int page, int pageSize) {
-        // Build the URL to get all countries
-        String url = restCountriesApiUrl + "/all?fields=name,population,area,languages";
+        try {
+            // Build the URL to get all countries
+            String url = restCountriesApiUrl + "/all?fields=name,population,area,languages";
 
-        // Make an HTTP GET request to the REST Countries API
-        ResponseEntity<Map[]> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, Map[].class);
+            // Make an HTTP GET request to the REST Countries API
+            ResponseEntity<Map[]> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, Map[].class);
 
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            // Retrieve the full list of countries as a list of maps
-            List<Map<String, Object>> allCountries = Arrays.asList(responseEntity.getBody());
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                // Retrieve the full list of countries as a list of maps
+                List<Map<String, Object>> allCountries = Arrays.asList(responseEntity.getBody());
 
-            // Apply filtering and sorting
-            List<Map<String, Object>> filteredCountries = filterAndSortCountries(allCountries, filterBy, sortBy);
+                // Apply filtering and sorting
+                List<Map<String, Object>> filteredCountries = filterAndSortCountries(allCountries, filterBy, sortBy);
 
-            // Implement pagination
-            int start = (page - 1) * pageSize;
-            int end = Math.min(start + pageSize, filteredCountries.size());
-            if (start >= filteredCountries.size() || start < 0 || end < 0) {
-                return null; // Return null if the start index is out of range
+                // Implement pagination
+                int start = (page - 1) * pageSize;
+                int end = Math.min(start + pageSize, filteredCountries.size());
+                if (start >= filteredCountries.size() || start < 0 || end < 0) {
+                    return null; // Return null if the start index is out of range
+                }
+
+                return filteredCountries.subList(start, end);
+            } else {
+                throw new CountryApiException("Failed to retrieve the list of countries");
             }
-
-            return filteredCountries.subList(start, end);
-        } else {
+        }catch (Exception e){
             throw new CountryApiException("Failed to retrieve the list of countries");
         }
     }

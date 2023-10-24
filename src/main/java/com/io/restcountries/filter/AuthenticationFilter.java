@@ -1,7 +1,9 @@
 package com.io.restcountries.filter;
 
+import com.io.restcountries.exception.CountryApiException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -31,7 +33,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         if (authToken == null || !authToken.equals(expectedToken)) {
             // Token is missing or invalid, return unauthorized status
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return;
+            throw new CountryApiException("Invalid credentials");
         }
 
         // Token is valid; continue processing the request
