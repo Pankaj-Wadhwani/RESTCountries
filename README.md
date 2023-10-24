@@ -1,8 +1,6 @@
 # RESTCountries
 ---
 
-# Country Data API Service
-
 This repository contains a backend API service that provides information about countries using the REST Countries API.
 
 ## Prerequisites
